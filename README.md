@@ -1,6 +1,28 @@
-# 第一课：看懂 GitHub Actions 如何运行 Python
+# GitHub Actions：运行和更新 Python
 
-当前阶段只创建本地学习文件，尚未发布到 GitHub，也没有创建 AWS 资源。
+第一课已上传 GitHub 并手动运行成功。当前进入第二课：推送到 main 自动运行；仍没有创建 AWS 资源。
+
+## 第二课：当前要做的操作
+
+当前脚本输出已改为 `Hello World v2`，workflow 已加入 `push` 到 `main` 的触发规则。下面第一课部分保留为学习记录，其手动触发说明描述的是旧版本。
+
+关键提醒：这次 push 本身就会触发更新后的 workflow，无需再点 Run workflow。先检查差异，再执行：
+
+```sh
+git --no-pager diff
+git add hello_world.py .github/workflows/hello.yml README.md
+git diff --cached --stat
+git commit -m "Run Hello World v2 automatically on push"
+git push
+```
+
+去 GitHub Actions 查看自动出现的新运行，确认事件为 push、提交对应本次 commit，并在步骤 3 看到 `Hello World v2`。只做本地 commit 不会触发。
+
+公司项目中，push 后是否部署 QA / Prod，由 jobs、if 条件、复用 workflow 和 environment 等共同决定；不能仅凭 `on: push` 判断。这个练习只执行 Python，没有部署步骤或 AWS 身份。
+
+---
+
+以下为第一课操作记录（当时脚本输出为 `Hello World`，仅手动触发）：
 打开 VS Code 后，先读本文件，再打开 `.github/workflows/hello.yml`，按中文注释理解每一步。
 
 ## 1. 在本机运行

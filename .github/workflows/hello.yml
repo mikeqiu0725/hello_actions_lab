@@ -5,10 +5,13 @@
 # GitHub 的 Actions 页面中显示的名称。
 name: "01 - Hello World 运行练习"
 
-# 触发方式：只允许在网页点击 Run workflow 手动运行。
-# 没有 push 或 schedule，所以提交代码和等待时间都不会自动触发运行。
+# 第二课：推送到 main 自动执行，也保留手动运行入口。
+# 关键提醒：git commit 只保存本地版本；git push 更新远程 main 才会触发。
+# 合并 PR 到 main 通常也会触发；推送到其他分支不会触发这里的 push 规则。
 # 首次使用：先把此文件提交到仓库默认分支，网页才会出现手动运行入口。
 on:
+  push:
+    branches: [main]  # 仅匹配 main 分支；不是所有分支。
   workflow_dispatch:
 
 # 给本次运行的 GitHub token 最小权限：只读取仓库代码。
@@ -31,7 +34,7 @@ jobs:
     steps:
       # run 表示执行 shell 命令；日志中会显示这条提醒。
       - name: "0. 提醒：本次仅运行脚本"
-        run: echo "本次不连接 AWS。代码提交不会自动运行；请手动触发。"
+        run: echo "本次不连接 AWS。推送到 main 会自动执行此脚本。"
 
       # uses 表示复用现成的 Action；@v6 是该 Action 的版本。
       # checkout 把当前所选分支的代码取到临时电脑，后续才能找到 .py 文件。
@@ -49,7 +52,7 @@ jobs:
           python-version: "3.12"
 
       # | 表示下面是多行命令；按顺序显示版本、执行脚本。
-      # 在 Actions 日志中展开此步骤，应该看到 Hello World。
+      # 在 Actions 日志中展开此步骤，应该看到 Hello World v2。
       - name: "3. 执行 hello_world.py"
         run: |
           python --version
@@ -59,7 +62,7 @@ jobs:
       # 写进去的 Markdown 会显示在本次运行的 Summary 页面。
       - name: "4. 写入学习提醒"
         run: |
-          echo "### 第一课完成" >> "$GITHUB_STEP_SUMMARY"
+          echo "### 第二课：自动触发练习完成" >> "$GITHUB_STEP_SUMMARY"
           echo "脚本已执行。展开步骤 3 查看输出。" >> "$GITHUB_STEP_SUMMARY"
-          echo "下一步：将输出改为 Hello World v2，提交，再手动运行并比较日志。" >> "$GITHUB_STEP_SUMMARY"
+          echo "查看此次运行的事件和 commit，确认它对应刚刚推送的版本；步骤 3 应输出 Hello World v2。" >> "$GITHUB_STEP_SUMMARY"
           echo "此流程未连接 AWS，也未执行 Terraform。" >> "$GITHUB_STEP_SUMMARY"
