@@ -1,0 +1,65 @@
+# 第一课：在 GitHub 的临时电脑上运行 Python。此文件不会部署到 AWS。
+# 费用前提：使用公开练习仓库 + 标准 GitHub-hosted runner。
+# 路径必须是仓库根目录下的 .github/workflows/hello.yml。
+
+# GitHub 的 Actions 页面中显示的名称。
+name: "01 - Hello World 运行练习"
+
+# 触发方式：只允许在网页点击 Run workflow 手动运行。
+# 没有 push 或 schedule，所以提交代码和等待时间都不会自动触发运行。
+# 首次使用：先把此文件提交到仓库默认分支，网页才会出现手动运行入口。
+on:
+  workflow_dispatch:
+
+# 给本次运行的 GitHub token 最小权限：只读取仓库代码。
+# 这里不是 AWS 权限，也没有配置任何 AWS 凭证。
+permissions:
+  contents: read
+
+# jobs 是要执行的任务集合；本练习只有一个任务。
+jobs:
+  hello:
+    name: "读取代码 → 准备 Python → 执行脚本"
+    # runner 是执行命令的临时电脑；这里使用 GitHub 标准 Linux runner。
+    # 它不是 AWS EC2，不会在你的 AWS 账号中创建服务器。
+    runs-on: ubuntu-latest
+    # 整个任务最多运行 3 分钟，避免错误导致长时间运行。
+    # 这是运行时间限制，不是账单封顶设置。
+    timeout-minutes: 3
+
+    # steps 按下面的顺序执行；某一步失败，后续普通步骤会停止。
+    steps:
+      # run 表示执行 shell 命令；日志中会显示这条提醒。
+      - name: "0. 提醒：本次仅运行脚本"
+        run: echo "本次不连接 AWS。代码提交不会自动运行；请手动触发。"
+
+      # uses 表示复用现成的 Action；@v6 是该 Action 的版本。
+      # checkout 把当前所选分支的代码取到临时电脑，后续才能找到 .py 文件。
+      - name: "1. 获取仓库代码"
+        uses: actions/checkout@v6
+        with:
+          # 后面不需要向仓库写入，因此不保留 Git 认证信息。
+          persist-credentials: false
+
+      # 明确 Python 版本，避免依赖 runner 自带的默认版本。
+      # with 是传给这个 Action 的参数；此脚本不需要 pip 安装任何依赖。
+      - name: "2. 准备 Python 3.12"
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      # | 表示下面是多行命令；按顺序显示版本、执行脚本。
+      # 在 Actions 日志中展开此步骤，应该看到 Hello World。
+      - name: "3. 执行 hello_world.py"
+        run: |
+          python --version
+          python hello_world.py
+
+      # GITHUB_STEP_SUMMARY 是 GitHub 提供的摘要文件路径。
+      # 写进去的 Markdown 会显示在本次运行的 Summary 页面。
+      - name: "4. 写入学习提醒"
+        run: |
+          echo "### 第一课完成" >> "$GITHUB_STEP_SUMMARY"
+          echo "脚本已执行。展开步骤 3 查看输出。" >> "$GITHUB_STEP_SUMMARY"
+          echo "下一步：将输出改为 Hello World v2，提交，再手动运行并比较日志。" >> "$GITHUB_STEP_SUMMARY"
+          echo "此流程未连接 AWS，也未执行 Terraform。" >> "$GITHUB_STEP_SUMMARY"

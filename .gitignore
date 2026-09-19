@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+.DS_Store
+# 后续 Terraform 练习：状态和凭证不可提交，锁定依赖的 .terraform.lock.hcl 应保留。
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+*.tfvars
+!example.tfvars
+.env
+.aws/
